@@ -1,0 +1,116 @@
+---
+title: "Statistical Comp HW2"
+author: "Jennifer Lieu"
+date: "9/23/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Part 1 Loading and Cleaning the Data in R
+
+i. Loading the data into a dataframe called housing.
+```{r}
+setwd("/Users/jenniferlieu/Desktop/Stat_Comp_Data")
+housing <- read.csv("NYChousing.csv", header=FALSE, as.is=TRUE)
+```
+
+ii. We have 22 columns and 2506 rows.
+
+iii. 
+```{r}
+apply(is.na(housing), 2, sum)
+```
+This function takes the dataframe "housing," counts the amount of times each column has NA in it.
+
+iv.
+```{r}
+# clear all rows from the data set with NA values
+housing <- na.omit(housing)
+```
+
+v. 
+I removed (2506-630)= 1876 rows when clearing rows with the NA value.
+It does agree with my prior result because my solution must be greater than or equal to the greatest value in the resulting vector of the apply function, which it is.
+
+vi. 
+```{r}
+#log of property value and summary statistics
+housing$V23 <- as.numeric(c("logValue", log(as.numeric(housing$V7[2:631]))))
+summary(housing$V23[2:631])
+mean(housing$V23[2:631])
+```
+The mean is 14.6472 and the min, median and max are in the summary statistics provided above.
+
+vii. 
+```{r}
+#log of Unit Numbers
+housing$V24 <- as.numeric(c("logUnits", log(as.numeric(housing$V16[2:631]))))
+```
+
+viii. 
+```{r}
+# TRUE if housing is built 1950 or later
+housing$V25 <- c("after1950", housing$V17[2:631]>=1950)
+```
+
+Part 2: EDA
+
+i.
+```{r}
+plot(housing$V24[2:631], housing$V23[2:631], main="Scatter Plot", xlab=housing$V24[2:631], ylab=housing$V23[2:631])
+```
+
+ii.
+```{r}
+plot(housing$V24[2:631], housing$V23[2:631], main="Scatter Plot", xlab=housing$V24[2:631], ylab=housing$V23[2:631],col = factor(housing$V25[2:631]))
+legend("bottomright", legend = levels(factor(housing$V25[2:631])), fill
+= unique(factor(housing$V25[2:631])))
+cov(housing$V24[2:631], housing$V23[2:631])
+```
+The Red dots are the dots of houses built during or after 1950. The Black dots are the dots of houses built before 1950. The covariance between logUnits and logValue is almost 1, which indicates a positive relationship between the two variables, with a reasonable amount of variation between the plot and the expected value of both variables. 
+
+iii. 
+```{r}
+cor(housing$V23[2:631],housing$V24[2:631])
+cor(housing[housing$V11 =="Manhattan",]$V23,housing[housing$V11 =="Manhattan",]$V24)
+cor(housing[housing$V11 =="Brooklyn",]$V23,housing[housing$V11 =="Brooklyn",]$V24)
+cor(housing[housing$V25 == "TRUE",]$V23,housing[housing$V25 == "TRUE",]$V24)
+cor(housing[housing$V25 == "FALSE",]$V23,housing[housing$V25 == "FALSE",]$V24)
+```
+The correlation between the variables for "logValue" and "logUnits" for:
+  i. the whole data set is: 0.7988655
+  ii. Manhattan is: 0.8710823
+  iii. Brooklyn is: 0.8053241
+  iv. property built during or after 1950 is: 0.746731
+  v. property built before 1950 is:0.7720285
+
+iv. 
+```{r}
+plot(housing[housing$V11 =="Brooklyn" | housing$V11 =="Manhattan",]$V24, housing[housing$V11 =="Brooklyn" | housing$V11 =="Manhattan",]$V23, main="Scatter Plot", xlab="logUnits", ylab="logValues",col = factor(housing[housing$V11 =="Brooklyn" | housing$V11 =="Manhattan",]$V11))
+legend("bottomright", legend = levels(factor(housing[housing$V11 =="Brooklyn" | housing$V11 =="Manhattan",]$V11)), fill
+= unique(factor(housing[housing$V11 =="Brooklyn" | housing$V11 =="Manhattan",]$V11)))
+```
+
+v.
+```{r}
+med.value <- median(housing[housing$V11 =="Manhattan",]$V7)
+```
+
+vi.
+```{r}
+housingbor <- boxplot(housing$V23[2:631]~housing$V11[2:631], data = housing, main="Log Housing Values", xlab="Log Housing Values", ylab="Boroughs",horizontal=TRUE, yaxt="n")
+axis(2, labels=c("Staten Island", "Queens", "Manhattan","Brooklyn" ,"Bronx"), at=1:5, las=2)
+```
+
+vii. 
+```{r}
+median(housing$V23[housing$V11 == "Bronx"])
+median(housing$V23[housing$V11 == "Brooklyn"])
+median(housing$V23[housing$V11 == "Manhattan"])
+median(housing$V23[housing$V11 == "Queens"])
+median(housing$V23[housing$V11 == "Staten Island"])
+```
+The above output yields the medians of the boxplot in the order of Bronx, Brooklyn, Manhattan, Queens, and Staten Island.
